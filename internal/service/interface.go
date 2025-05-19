@@ -6,5 +6,5 @@ import (
 )
 
 type FileService interface {
-	UploadFile(ctx context.Context, filename string, file multipart.File) error
+	UploadFile(ctx context.Context, fileHeader *multipart.FileHeader) error
 }

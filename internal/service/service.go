@@ -2,7 +2,11 @@ package service
 
 import (
 	"context"
+	"fmt"
+	"mime"
 	"mime/multipart"
+	"net/http"
+	"path/filepath"
 )
 
 var _ FileService = (*fileService)(nil)
@@ -15,6 +19,25 @@ func New() *fileService {
 }
 
 // UploadFile implements FileService.
-func (f *fileService) UploadFile(ctx context.Context, filename string, file multipart.File) error {
+func (f *fileService) UploadFile(ctx context.Context, fileHeader *multipart.FileHeader) error {
+	ext := filepath.Ext(fileHeader.Filename)
+
+	mimeType := mime.TypeByExtension(ext)
+	if mimeType == "" {
+		file, err := fileHeader.Open()
+		if err != nil {
+			return fmt.Errorf("service.UploadFile %w", err)
+		}
+		defer file.Close()
+
+		buffer := make([]byte, 512)
+		_, err = file.Read(buffer)
+		if err != nil {
+			return fmt.Errorf("service.UploadFile %w", err)
+		}
+
+		mimeType = http.DetectContentType(buffer)
+	}
+
 	return nil
 }
