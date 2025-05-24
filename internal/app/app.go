@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 	"videobin/internal/api"
+	"videobin/internal/repository"
 	"videobin/internal/routes"
 	"videobin/internal/service"
 )
@@ -16,6 +17,8 @@ import (
 type App struct {
 	httpServer *http.Server
 
+	database       repository.DatabaseStorage
+	fileStorage    repository.FileStorage
 	fileService    service.FileService
 	fileController api.Controller
 }
@@ -99,6 +102,22 @@ func (a *App) runHTTPServer() error {
 	}
 
 	return nil
+}
+
+func (a *App) Database(ctx context.Context) repository.DatabaseStorage {
+	if a.database == nil {
+		//a.database =
+	}
+
+	return a.database
+}
+
+func (a *App) FileStorage(ctx context.Context) repository.FileStorage {
+	if a.fileStorage == nil {
+		//a.fileStorage =
+	}
+
+	return a.fileStorage
 }
 
 func (a *App) FileService(ctx context.Context) service.FileService {
