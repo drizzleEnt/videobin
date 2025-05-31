@@ -1,4 +1,4 @@
-package service
+package filesrv
 
 import (
 	"context"
@@ -7,9 +7,10 @@ import (
 	"mime/multipart"
 	"net/http"
 	"path/filepath"
+	"videobin/internal/service"
 )
 
-var _ FileService = (*fileService)(nil)
+var _ service.FileService = (*fileService)(nil)
 
 type fileService struct {
 }

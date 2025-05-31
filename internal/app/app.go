@@ -9,18 +9,22 @@ import (
 	"syscall"
 	"time"
 	"videobin/internal/api"
+	"videobin/internal/api/filectrl"
+	"videobin/internal/middleware"
 	"videobin/internal/repository"
 	"videobin/internal/routes"
 	"videobin/internal/service"
+	"videobin/internal/service/filesrv"
 )
 
 type App struct {
 	httpServer *http.Server
 
-	database       repository.DatabaseStorage
-	fileStorage    repository.FileStorage
-	fileService    service.FileService
-	fileController api.Controller
+	database             repository.DatabaseStorage
+	fileStorage          repository.FileStorage
+	fileService          service.FileService
+	fileController       api.FileController
+	middlewareController middleware.Middleware
 }
 
 func New(ctx context.Context) (*App, error) {
@@ -78,7 +82,7 @@ func (a *App) initDebs(ctx context.Context) error {
 }
 
 func (a *App) initHTTPServer(ctx context.Context) error {
-	engine := routes.InitRoutes(a.Controller(ctx))
+	engine := routes.InitRoutes(a.FileController(ctx), a.Middleware(ctx))
 
 	srv := http.Server{
 		Addr:           ":8080",
@@ -122,16 +126,24 @@ func (a *App) FileStorage(ctx context.Context) repository.FileStorage {
 
 func (a *App) FileService(ctx context.Context) service.FileService {
 	if a.fileService == nil {
-		a.fileService = service.New()
+		a.fileService = filesrv.New()
 	}
 
 	return a.fileService
 }
 
-func (a *App) Controller(ctx context.Context) api.Controller {
+func (a *App) FileController(ctx context.Context) api.FileController {
 	if a.fileController == nil {
-		a.fileController = api.New(a.FileService(ctx))
+		a.fileController = filectrl.New(a.FileService(ctx))
 	}
 
 	return a.fileController
+}
+
+func (a *App) Middleware(ctx context.Context) middleware.Middleware {
+	if a.middlewareController == nil {
+		a.middlewareController = middleware.New()
+	}
+
+	return a.middlewareController
 }

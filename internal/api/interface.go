@@ -4,6 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Controller interface {
+type FileController interface {
 	UploadFile(c *gin.Context)
 }

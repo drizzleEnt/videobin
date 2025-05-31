@@ -1,24 +1,11 @@
-package api
+package filectrl
 
 import (
 	"fmt"
 	"net/http"
-	"videobin/internal/service"
 
 	"github.com/gin-gonic/gin"
 )
-
-var _ Controller = (*handler)(nil)
-
-type handler struct {
-	service service.FileService
-}
-
-func New(s service.FileService) *handler {
-	return &handler{
-		service: s,
-	}
-}
 
 // UploadFile implements Controller.
 func (h *handler) UploadFile(c *gin.Context) {
