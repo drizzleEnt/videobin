@@ -40,8 +40,6 @@ func (f *fileService) UploadFile(ctx context.Context, fileHeader *multipart.File
 		mimeType = http.DetectContentType(buffer)
 	}
 
-	
-
 	fmt.Printf("mimeType: %v\n", mimeType)
 
 	return nil
