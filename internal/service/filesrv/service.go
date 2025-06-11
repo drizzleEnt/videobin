@@ -7,16 +7,21 @@ import (
 	"mime/multipart"
 	"net/http"
 	"path/filepath"
+	"videobin/internal/repository"
 	"videobin/internal/service"
 )
 
 var _ service.FileService = (*fileService)(nil)
 
 type fileService struct {
+	r repository.DatabaseStorage
+	s repository.FileStorage
 }
 
-func New() *fileService {
-	return &fileService{}
+func New(r repository.DatabaseStorage) *fileService {
+	return &fileService{
+		r: r,
+	}
 }
 
 // UploadFile implements FileService.

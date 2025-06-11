@@ -10,8 +10,11 @@ import (
 	"time"
 	"videobin/internal/api"
 	"videobin/internal/api/filectrl"
+	"videobin/internal/clients"
+	dbclient "videobin/internal/clients/db"
 	"videobin/internal/middleware"
 	"videobin/internal/repository"
+	"videobin/internal/repository/postgres"
 	"videobin/internal/routes"
 	"videobin/internal/service"
 	"videobin/internal/service/filesrv"
@@ -20,6 +23,7 @@ import (
 type App struct {
 	httpServer *http.Server
 
+	dbclient             clients.DataBase
 	database             repository.DatabaseStorage
 	fileStorage          repository.FileStorage
 	fileService          service.FileService
@@ -108,9 +112,29 @@ func (a *App) runHTTPServer() error {
 	return nil
 }
 
+func (a *App) DBClient(ctx context.Context) clients.DataBase {
+	if a.dbclient == nil {
+		cl, err := dbclient.New(ctx, "")
+		if err != nil {
+			log.Printf("failed create new db client: %v", err)
+			os.Exit(1)
+		}
+
+		err = cl.DB().Ping(ctx)
+		if err != nil {
+			log.Printf("failed ping db: %v", err)
+			os.Exit(1)
+		}
+
+		a.dbclient = cl
+	}
+
+	return a.dbclient
+}
+
 func (a *App) Database(ctx context.Context) repository.DatabaseStorage {
 	if a.database == nil {
-		//a.database =
+		a.database = postgres.NewDatabaseStorage(a.DBClient(ctx))
 	}
 
 	return a.database
@@ -126,7 +150,7 @@ func (a *App) FileStorage(ctx context.Context) repository.FileStorage {
 
 func (a *App) FileService(ctx context.Context) service.FileService {
 	if a.fileService == nil {
-		a.fileService = filesrv.New()
+		a.fileService = filesrv.New(a.Database(ctx))
 	}
 
 	return a.fileService
